@@ -1,0 +1,70 @@
+name: train_model
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  targets:
+    runs-on: ubuntu-22.04
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+    
+      - uses: actions/checkout@v3
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@main
+        with:
+          logger: pretty
+          log-directives: nix_installer=trace
+          backtrace: full
+
+      - name: Nix cache
+        uses: DeterminateSystems/magic-nix-cache-action@main
+
+      - name: Build development environment
+        run: |
+          nix-build
+
+      - name: Run model
+        run: |
+          nix-shell default.nix --run "Rscript -e 'targets::tar_make()'"
+
+      - name: Identify files that the targets pipeline produced
+        run: git ls-files -mo --exclude=renv > .targets-files
+
+      - name: Create the runs branch if it does not already exist
+        if: steps.runs-exist.outcome != 'success'
+        run: git checkout --orphan targets-runs
+
+      - name: Put the worktree in the runs branch if the latter already exists
+        if: steps.runs-exist.outcome == 'success'
+        run: |
+          rm -r .git
+          mv .targets-runs/.git .
+          rm -r .targets-runs
+
+      - name: Upload latest run
+        run: |
+          git config --local user.name "GitHub Actions"
+          git config --local user.email "actions@github.com"
+          rm -r .gitignore .github/workflows
+          git add --all -- ':!renv'
+          for file in $(git ls-files -mo --exclude=renv)
+          do
+            git add --force $file
+          done
+          git commit -am "Run pipeline"
+          git push origin targets-runs
+
+      - name: Prepare failure artifact
+        if: failure()
+        run: rm -rf .git .github .targets-files .targets-runs
+
+      - name: Post failure artifact
+        if: failure()
+        uses: actions/upload-artifact@main
+        with:
+          name: ${{ runner.os }}-r${{ matrix.config.r }}-results
+          path: .
