@@ -43,8 +43,8 @@ jobs:
       - name: Restore output files from the previous run
         if: steps.runs-exist.outcome == 'success'
         run: |
-          nix-shell default.nix --run "Rscript -e 'for (dest in scan(".targets-runs/.targets-files", what = character())) {
-            source <- file.path(".targets-runs", dest)
+          nix-shell default.nix --run "Rscript -e 'for (dest in scan(\".targets-runs/.targets-files\", what = character())) {
+            source <- file.path(\".targets-runs\", dest)
             if (!file.exists(dirname(dest))) dir.create(dirname(dest), recursive = TRUE)
             if (file.exists(source)) file.rename(source, dest)
           }'"
