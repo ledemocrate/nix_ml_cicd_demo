@@ -80,7 +80,7 @@ list(
   
   tar_target(
     best_boosted_trees_hyperparams,
-    as.list(select_best(tuned_boosted_trees, "mn_log_loss"))
+    as.list(select_best(tuned_boosted_trees, "roc_auc"))
   ),
   
   tar_target(
