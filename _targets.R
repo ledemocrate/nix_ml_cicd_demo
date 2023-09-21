@@ -49,12 +49,12 @@ list(
   
   tar_target(
     boosted_trees_model,
-    define_model(boost_tree,
-                 "xgboost",
+    define_model(rand_forest,
+                 "randomForest",
                  "classification",
                  mtry = tune(),
                  tree = tune(),
-                 tree_depth = tune())
+                 min_n = tune())
   ),
   
   tar_target(
