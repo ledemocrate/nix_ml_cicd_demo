@@ -85,12 +85,12 @@ list(
   
   tar_target(
     best_boosted_trees_model,
-    define_model(boost_tree,
-                 "xgboost",
+    define_model(rand_forest,
+                 "randomForest",
                  "classification",
                  mtry = best_boosted_trees_hyperparams$mtry,
                  trees = best_boosted_trees_hyperparams$trees,
-                 tree_depth = best_boosted_trees_hyperparams$tree_depth)
+                 min_n = best_boosted_trees_hyperparams$min_n)
   ),
   
   tar_target(
