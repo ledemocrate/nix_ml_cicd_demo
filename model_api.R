@@ -1,3 +1,5 @@
+# RAJOUT D'UN COMMENTAIRE 
+
 get_model <- function(path){
   readRDS(path)
 }
